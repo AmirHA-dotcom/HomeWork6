@@ -22,9 +22,11 @@ class Node
 private:
     string name;
     int number;
+    float voltage;
 public:
-    Node(string& tag, int NO) : name(tag), number(NO) {}
+    Node(string& tag, int NO) : name(tag), number(NO) {voltage = 0.0f;}
     string get_name() const {return name;}
+    void set_voltage(float v) {voltage = v;}
     float get_voltage()
     {
 
@@ -35,10 +37,10 @@ class Component
 {
 protected:
     string name;
-    Node node_1;
-    Node node_2;
+    Node* node_1;
+    Node* node_2;
 public:
-    Component(string& tag, Node& first, Node& second) : name(tag), node_1(first), node_2(second) {}
+    Component(string& tag, Node* first, Node* second) : name(tag), node_1(first), node_2(second) {}
     virtual float get_voltage() = 0;
     virtual float get_current() = 0;
 };
@@ -48,7 +50,7 @@ class Voltage_Source : public Component
 private:
     float voltage;
 public:
-    Voltage_Source(string& tag, Node f, Node s, float V) : Component(tag, f, s), voltage(V) {}
+    Voltage_Source(string& tag, Node* f, Node* s, float V) : Component(tag, f, s), voltage(V) {}
     string get_name() const {return name;}
     float get_voltage() override
     {
@@ -66,7 +68,7 @@ private:
     float resistance;
 public:
     string get_name() const {return name;}
-    Resistor(string& tag, Node f, Node s, float R) : Component(tag, f, s), resistance(R) {}
+    Resistor(string& tag, Node* f, Node* s, float R) : Component(tag, f, s), resistance(R) {}
     float get_voltage() override
     {
 
@@ -86,18 +88,37 @@ private:
     vector<Node*> nodes;
     Voltage_Source* VS;
     vector<Resistor*> resistors;
+    Node* ground = nullptr;
 public:
     void add_node(string name)
     {
         nodes.push_back(new Node(name, ++node_NO));
     }
-    void add_resistor(string name, float R, Node node_1, Node node_2)
+    void add_resistor(string name, float R, string node_1, string node_2)
     {
-        resistors.push_back(new Resistor(name, node_1, node_2, R));
+        Node* N1 = nullptr;
+        Node* N2 = nullptr;
+        for (Node* n: nodes)
+        {
+            if (n->get_name() == node_1)
+                N1 = n;
+            else if (n->get_name() == node_2)
+                N2 = n;
+        }
+        resistors.push_back(new Resistor(name, N1, N2, R));
     }
-    void add_VS(string name, float V, Node node_1, Node node_2)
+    void add_VS(string name, float V, string node_1, string node_2)
     {
-        VS = new Voltage_Source(name, node_1, node_2, V);
+        Node* N1 = nullptr;
+        Node* N2 = nullptr;
+        for (Node* n: nodes)
+        {
+            if (n->get_name() == node_1)
+                N1 = n;
+            else if (n->get_name() == node_2)
+                N2 = n;
+        }
+        VS = new Voltage_Source(name, N1, N2, V);
     }
     void read_current(const string& name)
     {
@@ -110,7 +131,7 @@ public:
         {
             if (R->get_name() == name)
             {
-                cout << R->get_name() << " current = " << R->get_current() << "amps" << endl;
+                cout << R->get_name() << " current = " << R->get_current() << " amps" << endl;
                 return;
             }
         }
@@ -126,7 +147,7 @@ public:
         {
             if (R->get_name() == name)
             {
-                cout << R->get_name() << " current = " << R->get_voltage() << "amps" << endl;
+                cout << R->get_name() << " voltage = " << R->get_voltage() << " Volts" << endl;
                 return;
             }
         }
@@ -142,6 +163,17 @@ public:
             }
         }
     }
+    void ground(const string& name)
+    {
+        for (Node* n: nodes)
+        {
+            if (n->get_name() == name)
+            {
+                ground = n;
+                return;
+            }
+        }
+    }
 };
 
 // Int Main-------------------------------------------------------------------------------------------------------------
@@ -153,6 +185,7 @@ int main()
     smatch match;
     while (true)
     {
+        getline(cin, command);
         if (command == "end")
             return 0;
         else if (regex_match(command, match, add_node_pattern))
@@ -169,8 +202,7 @@ int main()
         }
         else if (regex_match(command, match, add_ground_pattern))
         {
-            // Empty :)
-            // He He He Ha!!!
+
         }
         else if (regex_match(command, match, read_current_pattern))
         {
