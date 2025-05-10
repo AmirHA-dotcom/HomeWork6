@@ -27,10 +27,7 @@ public:
     Node(string& tag, int NO) : name(tag), number(NO) {voltage = 0.0f;}
     string get_name() const {return name;}
     void set_voltage(float v) {voltage = v;}
-    float get_voltage()
-    {
-
-    };
+    float get_voltage() const {return voltage;}
 };
 
 class Component
@@ -189,32 +186,18 @@ int main()
         if (command == "end")
             return 0;
         else if (regex_match(command, match, add_node_pattern))
-        {
             controller.add_node(match[1]);
-        }
         else if (regex_match(command, match, add_resistor_pattern))
-        {
             controller.add_resistor(match[2], stof(match[1]), match[3], match[4]);
-        }
         else if (regex_match(command, match, add_VS_pattern))
-        {
             controller.add_VS("My_VS", stof(match[1]), match[2], match[3]);
-        }
         else if (regex_match(command, match, add_ground_pattern))
-        {
             controller.add_ground(match[1]);
-        }
         else if (regex_match(command, match, read_current_pattern))
-        {
             controller.read_current(match[1]);
-        }
         else if (regex_match(command, match, read_voltage_pattern))
-        {
             controller.read_voltage(match[1]);
-        }
         else if (regex_match(command, match, read_node_V_pattern))
-        {
             controller.read_node_voltage(match[1]);
-        }
     }
 }
