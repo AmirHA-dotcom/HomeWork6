@@ -5,8 +5,6 @@
 
 using namespace std;
 
-enum food_type {t_Drink, t_Dessert, t_Main};
-
 // Regex----------------------------------------------------------------------------------------------------------------
 
 regex add_drink_pattern(R"(^add drink (\w+) (\w+) (\w+)$)");
@@ -23,7 +21,7 @@ class Food
 {
 protected:
 string name;
-int base_price;
+float base_price;
 public:
     Food (string& food_name, int price) : name(food_name), base_price(price) {}
     string get_name() {return name;}
@@ -42,19 +40,19 @@ public:
 class Dessert: public Food
 {
 private:
-    int calories;
+    float calories;
 public:
     Dessert (string& name, int price, int calories) : Food(name, price), calories(calories) {}
-    int get_final_price () const {return base_price + calories/50;}
+    float get_final_price () const {return base_price + calories/50;}
 };
 
 class Main_Dish: public Food
 {
 private:
-    int weight;
+    float weight;
 public:
     Main_Dish(string& name, int price, int weight) : Food(name, price), weight(weight) {}
-    int get_final_price () const {return base_price + weight/20;}
+    float get_final_price () const {return base_price + weight/20;}
 };
 
 // Controller-----------------------------------------------------------------------------------------------------------
@@ -62,17 +60,51 @@ public:
 class Controller
 {
 private:
-    vector<pair<Food*, food_type>> foods;
-    int food_already_exists_index(const string& name)
+    vector <Drink*> drinks;
+    vector <Dessert*> desserts;
+    vector <Main_Dish*> main_dishes;
+    int drink_already_exists_index(const string& name)
     {
-        if (foods.empty())
+        if (drinks.empty())
             return -1;
 
         int index = -1;
-        for (const auto& food: foods)
+        for (Drink* food: drinks)
         {
             index++;
-            if (food.first->get_name() == name)
+            if (food->get_name() == name)
+            {
+                return index;
+            }
+        }
+        return -1;
+    }
+    int dessert_already_exists_index(const string& name)
+    {
+        if (desserts.empty())
+            return -1;
+
+        int index = -1;
+        for (Dessert* food: desserts)
+        {
+            index++;
+            if (food->get_name() == name)
+            {
+                return index;
+            }
+        }
+        return -1;
+    }
+    int main_dish_already_exists_index(const string& name)
+    {
+        if (main_dishes.empty())
+            return -1;
+
+        int index = -1;
+        for (Main_Dish* food: main_dishes)
+        {
+            index++;
+            if (food->get_name() == name)
             {
                 return index;
             }
@@ -82,46 +114,94 @@ private:
 public:
     void add_drink (string name, int base_price, int volume)
     {
-        if (food_already_exists_index(name) != -1)
+        if (drink_already_exists_index(name) != -1)
         {
             cout << "Item already exists." << endl;
             return;
         }
-        foods.push_back({new Drink(name, base_price, volume), t_Drink});
+        drinks.push_back(new Drink(name, base_price, volume));
         cout << name << " added!" << endl;
     }
 
     void add_dessert (string name, int base_price, int calories)
     {
-        if (food_already_exists_index(name) != -1)
+        if (dessert_already_exists_index(name) != -1)
         {
             cout << "Item already exists." << endl;
             return;
         }
-        foods.push_back({new Dessert(name, base_price, calories), t_Dessert});
+        desserts.push_back(new Dessert(name, base_price, calories));
         cout << name << " added!" << endl;
     }
 
     void add_main_dish (string name, int base_price, int weight)
     {
-        if (food_already_exists_index(name) != -1)
+        if (main_dish_already_exists_index(name) != -1)
         {
             cout << "Item already exists." << endl;
             return;
         }
-        foods.push_back({new Main_Dish(name, base_price, weight), t_Main});
+        main_dishes.push_back(new Main_Dish(name, base_price, weight));
         cout << name << " added!" << endl;
     }
 
     void print_final_price(string name)
     {
-        int index = food_already_exists_index(name);
-        if (index == -1)
+        int drink_index = drink_already_exists_index(name);
+        int dessert_index = dessert_already_exists_index(name);
+        int main_dish_index = main_dish_already_exists_index(name);
+        if (drink_index == -1 && dessert_index == -1 && main_dish_index == -1)
         {
             cout << "Item doesn't exist." << endl;
             return;
         }
+        if (drink_index != -1)
+        {
+            cout << name << ": " << floor(drinks[drink_index]->get_final_price()) << endl;
+            return;
+        }
+        else if (dessert_index != -1)
+        {
+            cout << name << ": " << floor(desserts[dessert_index]->get_final_price()) << endl;
+            return;
+        }
+        else
+        {
+            cout << name << ": " << floor(main_dishes[main_dish_index]->get_final_price()) << endl;
+            return;
+        }
+    }
 
+    void print_total_price()
+    {
+        float sum = 0;
+        for (Drink* d: drinks)
+            sum += d->get_final_price();
+        for (Dessert* d: desserts)
+            sum += d->get_final_price();
+        for (Main_Dish* m: main_dishes)
+            sum += m->get_final_price();
+        cout << "Total: " << (int)sum << endl;
+    }
+
+    void remove_item(string name)
+    {
+        int drink_index = drink_already_exists_index(name);
+        int dessert_index = dessert_already_exists_index(name);
+        int main_dish_index = main_dish_already_exists_index(name);
+        if (drink_index == -1 && dessert_index == -1 && main_dish_index == -1)
+        {
+            cout << "Item doesn't exist." << endl;
+            return;
+        }
+        if (drink_index != -1)
+            drinks.erase(drinks.begin() + drink_index);
+        else if (dessert_index != -1)
+            desserts.erase(desserts.begin() + dessert_index);
+
+        else
+            main_dishes.erase(main_dishes.begin() + main_dish_index);
+        cout << name << " deleted." << endl;
     }
 };
 
@@ -155,17 +235,17 @@ int main()
 
         else if (regex_match(command, match, print_final_cost_pattern))
         {
-
+            controller.print_final_price(match[1]);
         }
 
         else if (regex_match(command, match, print_total_cost_pattern))
         {
-
+            controller.print_total_price();
         }
 
         else if (regex_match(command, match, remove_item_pattern))
         {
-
+            controller.remove_item(match[1]);
         }
     }
 }
