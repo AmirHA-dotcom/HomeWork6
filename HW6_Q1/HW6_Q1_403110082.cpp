@@ -21,7 +21,7 @@ class Food
 {
 protected:
 string name;
-float base_price;
+int base_price;
 public:
     Food (string& food_name, int price) : name(food_name), base_price(price) {}
     string get_name() {return name;}
@@ -40,19 +40,19 @@ public:
 class Dessert: public Food
 {
 private:
-    float calories;
+    int calories;
 public:
     Dessert (string& name, int price, int calories) : Food(name, price), calories(calories) {}
-    float get_final_price () const {return base_price + calories/50;}
+    int get_final_price () const {return base_price + calories/50;}
 };
 
 class Main_Dish: public Food
 {
 private:
-    float weight;
+    int weight;
 public:
     Main_Dish(string& name, int price, int weight) : Food(name, price), weight(weight) {}
-    float get_final_price () const {return base_price + weight/20;}
+    int get_final_price () const {return base_price + weight/20;}
 };
 
 // Controller-----------------------------------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ public:
 
     void print_total_price()
     {
-        float sum = 0;
+        int sum = 0;
         for (Drink* d: drinks)
             sum += d->get_final_price();
         for (Dessert* d: desserts)
