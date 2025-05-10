@@ -20,9 +20,14 @@ regex read_node_V_pattern("^read node voltage (\\w+)$");
 class Node
 {
 private:
+    string name;
     int number;
 public:
-    float get_voltage;
+    Node(string& tag, int NO) : name(tag), number(NO) {}
+    float get_voltage
+    {
+
+    };
 };
 
 class Component
@@ -32,13 +37,18 @@ protected:
     Node node_1;
     Node node_2;
 public:
+    Component(string& tag, Node& first, Node& second) : name(tag), node_1(first), node_2(second) {}
     virtual float get_voltage() = 0;
     virtual float get_current() = 0;
 };
 
 class Voltage_Source : public Component
 {
+private:
+    float voltage;
 public:
+    Voltage_Source(string& tag, Node f, Node s, float V) : Component(tag, f, s), voltage(V) {}
+
     float get_voltage() override
     {
 
@@ -52,7 +62,11 @@ public:
 
 class Resistor : public Component
 {
+private:
+    float resistance;
 public:
+    Resistor(string& tag, Node f, Node s, float R) : Component(tag, f, s), resistance(R) {}
+
     float get_voltage() override
     {
 
@@ -69,8 +83,9 @@ public:
 class Controller
 {
 private:
-    Voltage_Source VS;
-    vector<Resistor> resistors;
+    vector<Node*> nodes;
+    Voltage_Source* VS;
+    vector<Resistor*> resistors;
 public:
 
 };
