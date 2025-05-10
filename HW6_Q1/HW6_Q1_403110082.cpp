@@ -7,12 +7,12 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_drink_pattern(R"(^add drink (\w+) (\w+) (\w+)$)");
-regex add_dessert_pattern(R"(^add dessert (\w+) (\w+) (\w+)$)");
-regex add_main_dish_pattern(R"(^add main (\w+) (\w+) (\w+)$)");
-regex print_final_cost_pattern("^print (\\w+)$");
+regex add_drink_pattern(R"(^add drink (\w+) (\w+) (\w+)\s*$)");
+regex add_dessert_pattern(R"(^add dessert (\w+) (\w+) (\w+)\s*$)");
+regex add_main_dish_pattern(R"(^add main (\w+) (\w+) (\w+)\s*$)");
+regex print_final_cost_pattern("^print (\\w+)\\s*$");
 regex print_total_cost_pattern("^sum$");
-regex remove_item_pattern("^delete (\\w+)$");
+regex remove_item_pattern("^delete (\\w+)\\s*$");
 smatch match;
 
 // Model----------------------------------------------------------------------------------------------------------------
