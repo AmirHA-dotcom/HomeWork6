@@ -54,7 +54,7 @@ public:
     string get_name() const {return name;}
     float get_voltage() override
     {
-
+        return voltage;
     }
     float get_current() override
     {
@@ -71,11 +71,11 @@ public:
     Resistor(string& tag, Node* f, Node* s, float R) : Component(tag, f, s), resistance(R) {}
     float get_voltage() override
     {
-
+        return abs(node_1->get_voltage() - node_2->get_voltage());
     }
     float get_current() override
     {
-
+        return abs(node_1->get_voltage() - node_2->get_voltage()) / resistance;
     }
 };
 
