@@ -31,28 +31,28 @@ public:
 class Drink: public Food
 {
 private:
-    int volume;
+    float volume;
 public:
     Drink (string& name, int price, int volume) : Food(name, price), volume(volume) {}
-    int get_final_price () const {return base_price + volume/10;}
+    float get_final_price () const {return base_price + volume/10;}
 };
 
 class Dessert: public Food
 {
 private:
-    int calories;
+    float calories;
 public:
     Dessert (string& name, int price, int calories) : Food(name, price), calories(calories) {}
-    int get_final_price () const {return base_price + calories/50;}
+    float get_final_price () const {return base_price + calories/50;}
 };
 
 class Main_Dish: public Food
 {
 private:
-    int weight;
+    float weight;
 public:
     Main_Dish(string& name, int price, int weight) : Food(name, price), weight(weight) {}
-    int get_final_price () const {return base_price + weight/20;}
+    float get_final_price () const {return base_price + weight/20;}
 };
 
 // Controller-----------------------------------------------------------------------------------------------------------
@@ -157,17 +157,17 @@ public:
         }
         if (drink_index != -1)
         {
-            cout << name << ": " << floor(drinks[drink_index]->get_final_price()) << endl;
+            cout << name << ": " << int(drinks[drink_index]->get_final_price()) << endl;
             return;
         }
         else if (dessert_index != -1)
         {
-            cout << name << ": " << floor(desserts[dessert_index]->get_final_price()) << endl;
+            cout << name << ": " << int(desserts[dessert_index]->get_final_price()) << endl;
             return;
         }
         else
         {
-            cout << name << ": " << floor(main_dishes[main_dish_index]->get_final_price()) << endl;
+            cout << name << ": " << int(main_dishes[main_dish_index]->get_final_price()) << endl;
             return;
         }
     }
@@ -181,7 +181,7 @@ public:
             sum += d->get_final_price();
         for (Main_Dish* m: main_dishes)
             sum += m->get_final_price();
-        cout << "Total: " << (int)sum << endl;
+        cout << "Total: " << int(sum) << endl;
     }
 
     void remove_item(string name)
