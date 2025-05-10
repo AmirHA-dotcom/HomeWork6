@@ -163,7 +163,7 @@ public:
             }
         }
     }
-    void ground(const string& name)
+    void add_ground(const string& name)
     {
         for (Node* n: nodes)
         {
@@ -202,7 +202,7 @@ int main()
         }
         else if (regex_match(command, match, add_ground_pattern))
         {
-
+            controller.add_ground(match[1]);
         }
         else if (regex_match(command, match, read_current_pattern))
         {
