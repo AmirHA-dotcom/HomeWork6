@@ -7,7 +7,7 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_student_pattern(R"(^Add student (\w+) (\w+) (\d(10)) (\d(10)) (\w+) (\d(9)) (\d(4))$)");
+regex add_student_pattern(R"(^Add student (\w+) (\w+) (\d[10]) (\d[10]) (\w+) (\d[9]) (\d[4])$)");
 regex add_professor_pattern(R"(^Add professor (\w+) (\w+) (\d(10)) (\d(10)) (\w+) (\d+)$)");
 regex add_TA_pattern(R"(^Add TA (\w+) (\w+) (\d(10)) (\d(10)) (\w+) (\d(9)) (\d(4)) (\w+)$)");
 regex create_class_pattern("^Create course (\\w+)$");
@@ -95,9 +95,10 @@ private:
     vector<Professor*> professors;
     vector<Course*> courses;
 public:
-    void add_student()
+    void add_student(string first_name, string last_name, string national_ID, string phone, string major, string student_ID, string year)
     {
-
+        students.push_back(new Student(first_name, last_name, national_ID, phone, major, student_ID, year));
+    cout << "Student added successfully!" << endl;
     }
 };
 
@@ -105,6 +106,7 @@ public:
 
 int main()
 {
+    Controller AHA;
     string command;
     smatch match;
     while (true)
@@ -112,7 +114,8 @@ int main()
         getline(cin, command);
         if(command == "exit")
             return 0;
-
+        else if (regex_match(command, match, add_student_pattern))
+            AHA.add_student(match[1], match[2], match[3], match[4], match[5], match[6], match[7]);
         else
             cout << "OOPs, something went wrong!" << endl;
     }
