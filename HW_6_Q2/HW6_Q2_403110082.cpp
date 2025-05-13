@@ -3,6 +3,7 @@
 #include <string>
 #include <regex>
 #include <unordered_map>
+#include <iomanip>
 
 using namespace std;
 
@@ -47,6 +48,7 @@ class Voltage_Source : public Component
 {
 public:
     float voltage;
+    float current;
     Voltage_Source(string& tag, Node* f, Node* s, float V) : Component(tag, f, s), voltage(V) {}
     string get_name() const {return name;}
     float get_voltage() override
@@ -55,7 +57,7 @@ public:
     }
     float get_current() override
     {
-        return 0.0f;
+        return current;
     }
 };
 
@@ -85,39 +87,36 @@ private:
     Voltage_Source* VS;
     vector<Resistor*> resistors;
     Node* ground = nullptr;
-    float determinant(vector<vector<float>> matrix) {
+    float determinant(vector<vector<float>> matrix)
+    {
         int n = matrix.size();
         float det = 1.0f;
-
-        for (int i = 0; i < n; i++) {
-            // Partial pivot
+        for (int i = 0; i < n; i++)
+        {
             int max_row = i;
-            for (int k = i + 1; k < n; k++) {
-                if (abs(matrix[k][i]) > abs(matrix[max_row][i])) {
+            for (int k = i + 1; k < n; k++)
+            {
+                if (abs(matrix[k][i]) > abs(matrix[max_row][i]))
+                {
                     max_row = k;
                 }
             }
-
-            if (max_row != i) {
+            if (max_row != i)
+            {
                 swap(matrix[i], matrix[max_row]);
                 det *= -1;
             }
-
-            if (matrix[i][i] == 0) {
-                return 0; // Singular matrix
-            }
-
             // Gaussian elimination
-            for (int j = i + 1; j < n; j++) {
+            for (int j = i + 1; j < n; j++)
+            {
                 float factor = matrix[j][i] / matrix[i][i];
-                for (int k = i; k < n; k++) {
+                for (int k = i; k < n; k++)
+                {
                     matrix[j][k] -= factor * matrix[i][k];
                 }
             }
-
             det *= matrix[i][i];
         }
-
         return det;
     }
     vector<float> solve_cramer(vector<vector<float>> G, vector<float> I) {
@@ -171,14 +170,14 @@ public:
         analyze_voltages();
         if (name == "VIN")
         {
-            cout << "VIN current = " << VS->get_current();
+            cout << "VIN current = " << fixed << setprecision(2) << VS->get_current() << " amps" << endl;
             return;
         }
         for (Resistor* R: resistors)
         {
             if (R->get_name() == name)
             {
-                cout << R->get_name() << " current = " << R->get_current() << " amps" << endl;
+                cout << R->get_name() << " current = " << fixed << setprecision(2) << R->get_current() << " amps" << endl;
                 return;
             }
         }
@@ -188,14 +187,14 @@ public:
         analyze_voltages();
         if (name == "VIN")
         {
-            cout << "VIN current = " << VS->get_voltage();
+            cout << "VIN voltage = " << fixed << setprecision(2) << VS->get_voltage() << " volts" << endl;
             return;
         }
         for (Resistor* R: resistors)
         {
             if (R->get_name() == name)
             {
-                cout << R->get_name() << " voltage = " << R->get_voltage() << " Volts" << endl;
+                cout << R->get_name() << " voltage = " << fixed << setprecision(2) << R->get_voltage() << " volts" << endl;
                 return;
             }
         }
@@ -206,7 +205,7 @@ public:
         {
             if (n->get_name() == name)
             {
-                cout << n->get_name() << " voltage = " << n->get_voltage() << " Volts" << endl;
+                cout << n->get_name() << " voltage = " << fixed << setprecision(2) << n->get_voltage() << " volts" << endl;
                 return;
             }
         }
@@ -229,8 +228,8 @@ public:
             if (node != ground)
                 non_ground_nodes.push_back(node);
         int nodes_count = non_ground_nodes.size();
-        vector<vector<float>> G(nodes_count, vector<float>(nodes_count, 0.0f));
-        vector<float> I(nodes_count, 0.0f);
+        vector<vector<float>> G(nodes_count + 1, vector<float>(nodes_count + 1, 0.0f));
+        vector<float> I(nodes_count + 1, 0.0f);
 
         unordered_map<string, int> node_index;
         int index = 0;
@@ -265,27 +264,29 @@ public:
 
         Node* node_1_VS = VS->node_1;
         Node* node_2_VS = VS->node_2;
-        if (node_1_VS == ground) {
-            int j = node_index[node_2_VS->get_name()];
-            I[j] += VS->voltage;
-        }
-        else if (node_2_VS == ground) {
+        int vs_row = nodes_count;
+
+        if (node_1_VS != ground)
+        {
             int i = node_index[node_1_VS->get_name()];
-            I[i] += VS->voltage;
+            G[vs_row][i] = 1;
+            G[i][vs_row] = 1;
         }
-        else {
-            int i = node_index[node_1_VS->get_name()];
+
+        if (node_2_VS != ground)
+        {
             int j = node_index[node_2_VS->get_name()];
-            I[i] += VS->voltage;
-            I[j] -= VS->voltage;
+            G[vs_row][j] = -1;
+            G[j][vs_row] = -1;
         }
+
+        I[vs_row] = VS->voltage;
 
         vector<float> node_voltages = solve_cramer(G, I);
         for (int i = 0; i < nodes_count; i++)
             non_ground_nodes[i]->set_voltage(node_voltages[i]);
         ground->set_voltage(0);
-        for (Node* node: nodes)
-            cout << node->get_name() << " voltage = " << node->get_voltage() << endl;
+        VS->current = -node_voltages[nodes_count];
     }
 };
 
