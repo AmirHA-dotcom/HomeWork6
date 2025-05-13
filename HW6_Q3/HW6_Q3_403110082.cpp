@@ -32,6 +32,10 @@ protected:
 public:
     Person(string& fname, string& lname, string& n_ID, string& phone_NO) : first_name(fname), last_name(lname), national_ID(n_ID), phone_number(phone_NO) {}
     virtual void display_info() = 0;
+    string get_first_name() {return first_name;}
+    string get_last_name() {return last_name;}
+    string get_national_ID() {return national_ID;}
+    string get_phone_number() {return phone_number;}
 };
 
 class Student : public Person
@@ -42,6 +46,9 @@ protected:
     string entrance_year;
 public:
     Student(string& fname, string& lname, string& n_ID, string& phone_NO, string& major_, string& s_ID, string& e_year) : Person(fname, lname, n_ID, phone_NO), major(major_), student_ID(s_ID), entrance_year(e_year) {}
+    string get_major() {return major;}
+    string get_student_ID() {return student_ID;}
+    string get_entrance_year() {return entrance_year;}
     void display_info() override
     {
 
@@ -78,9 +85,26 @@ class Course
 private:
     string course_name;
     Professor* instructor;
-    Assistant* assistant;
+    vector<Assistant*> assistants;
     vector<Student*> students;
 public:
+    Course(string& c_name) : course_name(c_name) {instructor = nullptr;}
+    string get_name() {return course_name;}
+    void add_student(Student* student)
+    {
+        students.push_back(student);
+    }
+    void assign_professor(Professor* professor)
+    {
+        instructor = professor;
+    }
+    void add_assistant(Assistant* assistant)
+    {
+        assistants.push_back(assistant);
+    }
+    vector<Assistant*> get_assistants() {return assistants;}
+    Professor* get_professor() {return instructor;}
+    vector<Student*> get_students() {return students;}
     void display_course_info()
     {
 
@@ -111,6 +135,89 @@ public:
     {
         assistants.push_back(new Assistant(first_name, last_name, national_ID, phone, major, student_ID, year, role));
         cout << "Assistant added successfully!" << endl;
+    }
+    void add_course(string course_name)
+    {
+        courses.push_back(new Course(course_name));
+        cout << "Course created successfully!" << endl;
+    }
+    void add_student_to_course(string first_name, string last_name, string student_ID, string course_name)
+    {
+        int course_index = -1;
+        for (int i = 0; i < courses.size(); i++)
+        {
+            if (courses[i]->get_name() == course_name)
+            {
+                course_index = i;
+                break;
+            }
+        }
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        for (Student* student: courses[course_index]->get_students())
+        {
+            if (student->get_first_name() == first_name && student->get_last_name() == last_name && student->get_student_ID() == student_ID)
+            {
+                cout << "OOPs, something went wrong!" << endl;
+                return;
+            }
+        }
+        int student_index = -1;
+        for (int i = 0; i < students.size(); i++)
+        {
+            if (students[i]->get_first_name() == first_name && students[i]->get_last_name() == last_name && students[i]->get_student_ID() == student_ID)
+            {
+                student_index = i;
+                break;
+            }
+        }
+        if (student_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        courses[course_index]->add_student(students[student_index]);
+        cout << "Student enrolled in the course successfully!" << endl;
+    }
+    void assign_professor_to_course(string first_name, string last_name, string national_ID, string course_name)
+    {
+        int course_index = -1;
+        for (int i = 0; i < courses.size(); i++)
+        {
+            if (courses[i]->get_name() == course_name)
+            {
+                course_index = i;
+                break;
+            }
+        }
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        if (courses[course_index]->get_professor() == nullptr)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        int professor_index = -1;
+        for (int i = 0; i < professors.size(); i++)
+        {
+            if (professors[i]->get_first_name() == first_name && professors[i]->get_last_name() == last_name && professors[i]->get_national_ID() == national_ID)
+            {
+                professor_index = i;
+            }
+        }
+        if (professor_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        courses[course_index]->assign_professor(professors[professor_index]);
+        cout << "Professor assigned to the course successfully!" << endl;
     }
 };
 
