@@ -7,18 +7,18 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_student_pattern(R"(^Add student (\w+) (\w+) (\d[10]) (\d[10]) (\w+) (\d[9]) (\d[4])$)");
-regex add_professor_pattern(R"(^Add professor (\w+) (\w+) (\d(10)) (\d(10)) (\w+) (\d+)$)");
-regex add_TA_pattern(R"(^Add TA (\w+) (\w+) (\d(10)) (\d(10)) (\w+) (\d(9)) (\d(4)) (\w+)$)");
-regex create_class_pattern("^Create course (\\w+)$");
-regex add_student_to_course_pattern(R"(^Enroll student (\w+) (\w+) (\d(9)) in course (//w+)$)");
-regex assign_professor_pattern(R"(^Assign professor (\w+) (\w+) (\d(9)) to course (\w+)$)");
-regex assign_course_grade_pattern(R"(^Assign grade (\w+) for course (\w+) for student (\w+) (\w+) (\d(9)) $)");
-regex show_student_info_pattern(R"(^Find student (\w+) (\w+) (\d(9))$)");
-regex show_professor_info_pattern(R"(^Find professor (\w+) (\w+) (\d(10))$)");
-regex show_course_info_pattern("^Find course (\\w+)$");
+regex add_student_pattern(R"(^Add student (\S+) (\S+) (\d{10}) (\d{10}) (\S+) (\d{9}) (\d{4})$)");
+regex add_professor_pattern(R"(^Add professor (\S+) (\S+) (\d{10}) (\d{10}) (\S+) (\d+)$)");
+regex add_TA_pattern(R"(^Add TA (\S+) (\S+) (\d{10}) (\d{10}) (\S+) (\d{9}) (\d{4}) (\S+)$)");
+regex create_class_pattern("^Create course (\\S+)$");
+regex add_student_to_course_pattern(R"(^Enroll student (\S+) (\S+) (\d{9}) in course (/S+)$)");
+regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{9}) to course (\S+)$)");
+regex assign_course_grade_pattern(R"(^Assign grade (\S+) for course (\S+) for student (\S+) (\S+) (\d{9}) $)");
+regex show_student_info_pattern(R"(^Find student (\S+) (\S+) (\d{9})$)");
+regex show_professor_info_pattern(R"(^Find professor (\S+) (\S+) (\d{10})$)");
+regex show_course_info_pattern("^Find course (\\S+)$");
 regex show_course_students_pattern("^List students in course (\\w+)$");
-regex assign_assistant_to_course_pattern(R"(^Assign assistant (\w+) (\w+) (\d(9)) to course (\w+)$)");
+regex assign_assistant_to_course_pattern(R"(^Assign assistant (\S+) (\S+) (\d{9}) to course (\S+)$)");
 
 // Model----------------------------------------------------------------------------------------------------------------
 
@@ -66,6 +66,7 @@ class Assistant : public Student
 private:
     string role;
 public:
+    Assistant(string& fname, string& lname, string& n_ID, string& phone_NO, string& major_, string& s_ID, string& e_year, string& role_) : Student(fname, lname, n_ID, phone_NO, major_, s_ID, e_year), role(role_) {}
     void display_info() override
     {
 
@@ -93,12 +94,23 @@ class Controller
 private:
     vector<Student*> students;
     vector<Professor*> professors;
+    vector<Assistant*> assistants;
     vector<Course*> courses;
 public:
     void add_student(string first_name, string last_name, string national_ID, string phone, string major, string student_ID, string year)
     {
         students.push_back(new Student(first_name, last_name, national_ID, phone, major, student_ID, year));
-    cout << "Student added successfully!" << endl;
+        cout << "Student added successfully!" << endl;
+    }
+    void add_professor(string first_name, string last_name, string national_ID, string phone, string department, string salary)
+    {
+        professors.push_back(new Professor(first_name, last_name, national_ID, phone, department, salary));
+        cout << "professor added successfully!" << endl;
+    }
+    void add_TA(string first_name, string last_name, string national_ID, string phone, string major, string student_ID, string year, string role)
+    {
+        assistants.push_back(new Assistant(first_name, last_name, national_ID, phone, major, student_ID, year, role));
+        cout << "Assistant added successfully!" << endl;
     }
 };
 
@@ -116,6 +128,10 @@ int main()
             return 0;
         else if (regex_match(command, match, add_student_pattern))
             AHA.add_student(match[1], match[2], match[3], match[4], match[5], match[6], match[7]);
+        else if (regex_match(command, match, add_professor_pattern))
+            AHA.add_professor(match[1], match[2], match[3], match[4], match[5], match[6]);
+        else if (regex_match(command, match, add_TA_pattern))
+            AHA.add_TA(match[1], match[2], match[3], match[4], match[5], match[6], match[7], match[8]);
         else
             cout << "OOPs, something went wrong!" << endl;
     }
