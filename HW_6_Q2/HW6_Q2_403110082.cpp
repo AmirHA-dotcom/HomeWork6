@@ -25,11 +25,14 @@ private:
     string name;
     int number;
     float voltage;
+    bool ground;
 public:
-    Node(string& tag, int NO) : name(tag), number(NO) {voltage = 0;}
+    Node(string& tag, int NO) : name(tag), number(NO) {voltage = 0; ground = false;}
     string get_name() const {return name;}
     void set_voltage(float v) {voltage = v;}
     float get_voltage() const {return voltage;}
+    void make_ground() {ground = true;}
+    bool is_ground() {return ground;}
 };
 
 class Component
@@ -86,7 +89,6 @@ private:
     vector<Node*> nodes;
     Voltage_Source* VS;
     vector<Resistor*> resistors;
-    Node* ground = nullptr;
     float determinant(vector<vector<float>> matrix)
     {
         int n = matrix.size();
@@ -201,6 +203,7 @@ public:
     }
     void read_node_voltage(const string& name)
     {
+        analyze_voltages();
         for (Node* n: nodes)
         {
             if (n->get_name() == name)
@@ -216,7 +219,7 @@ public:
         {
             if (n->get_name() == name)
             {
-                ground = n;
+                n->make_ground();
                 return;
             }
         }
@@ -225,7 +228,7 @@ public:
     {
         vector<Node*> non_ground_nodes;
         for (Node* node: nodes)
-            if (node != ground)
+            if (!node->is_ground())
                 non_ground_nodes.push_back(node);
         int nodes_count = non_ground_nodes.size();
         vector<vector<float>> G(nodes_count + 1, vector<float>(nodes_count + 1, 0));
@@ -241,7 +244,7 @@ public:
             Node* node_1 = R->node_1;
             Node* node_2 = R->node_2;
             float conductance = 1/R->resistance;
-            if (node_1 != ground && node_2 != ground)
+            if (!node_1->is_ground() && !node_2->is_ground())
             {
                 int i = node_index[node_1->get_name()];
                 int j = node_index[node_2->get_name()];
@@ -250,12 +253,12 @@ public:
                 G[i][j] -= conductance;
                 G[j][i] -= conductance;
             }
-            else if (node_1 == ground)
+            else if (node_1->is_ground())
             {
                 int j = node_index[node_2->get_name()];
                 G[j][j] += conductance;
             }
-            else if (node_2 == ground)
+            else if (node_2->is_ground())
             {
                 int i = node_index[node_1->get_name()];
                 G[i][i] += conductance;
@@ -266,14 +269,14 @@ public:
         Node* node_2_VS = VS->node_2;
         int vs_row = nodes_count;
 
-        if (node_1_VS != ground)
+        if (!node_1_VS->is_ground())
         {
             int i = node_index[node_1_VS->get_name()];
             G[vs_row][i] = 1;
             G[i][vs_row] = 1;
         }
 
-        if (node_2_VS != ground)
+        if (!node_2_VS->is_ground())
         {
             int j = node_index[node_2_VS->get_name()];
             G[vs_row][j] = -1;
@@ -285,7 +288,9 @@ public:
         vector<float> node_voltages = solve_cramer(G, I);
         for (int i = 0; i < nodes_count; i++)
             non_ground_nodes[i]->set_voltage(node_voltages[i]);
-        ground->set_voltage(0);
+        for (Node* node : nodes)
+            if (node->is_ground())
+                node->set_voltage(0);
         VS->current = -node_voltages[nodes_count];
     }
 };
