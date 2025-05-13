@@ -9,13 +9,13 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_node_pattern("add node (\\w+)");
-regex add_resistor_pattern(R"(add resistor (\w+) (\w+) (\w+) (\w+))");
-regex add_VS_pattern(R"(add voltage source (\w+) (\w+) (\w+))");
-regex add_ground_pattern("add ground (\\w+)");
-regex read_current_pattern("read current (\\w+)");
-regex read_voltage_pattern("read voltage (\\w+)");
-regex read_node_V_pattern("read node voltage (\\w+)");
+regex add_node_pattern("add node (\\w+)\\s*");
+regex add_resistor_pattern(R"(add resistor (\w+) (\w+) (\w+) (\w+)\s*)");
+regex add_VS_pattern(R"(add voltage source (\w+) (\w+) (\w+)\s*)");
+regex add_ground_pattern("add ground (\\w+)\\s*");
+regex read_current_pattern("read current (\\w+)\\s*");
+regex read_voltage_pattern("read voltage (\\w+)\\s*");
+regex read_node_V_pattern("read node voltage (\\w+)\\s*");
 
 // Model----------------------------------------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ private:
     int number;
     float voltage;
 public:
-    Node(string& tag, int NO) : name(tag), number(NO) {voltage = 0.0f;}
+    Node(string& tag, int NO) : name(tag), number(NO) {voltage = 0;}
     string get_name() const {return name;}
     void set_voltage(float v) {voltage = v;}
     float get_voltage() const {return voltage;}
@@ -90,7 +90,7 @@ private:
     float determinant(vector<vector<float>> matrix)
     {
         int n = matrix.size();
-        float det = 1.0f;
+        float det = 1;
         for (int i = 0; i < n; i++)
         {
             int max_row = i;
@@ -228,8 +228,8 @@ public:
             if (node != ground)
                 non_ground_nodes.push_back(node);
         int nodes_count = non_ground_nodes.size();
-        vector<vector<float>> G(nodes_count + 1, vector<float>(nodes_count + 1, 0.0f));
-        vector<float> I(nodes_count + 1, 0.0f);
+        vector<vector<float>> G(nodes_count + 1, vector<float>(nodes_count + 1, 0));
+        vector<float> I(nodes_count + 1, 0);
 
         unordered_map<string, int> node_index;
         int index = 0;
