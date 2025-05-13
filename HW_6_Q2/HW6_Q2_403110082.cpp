@@ -8,13 +8,13 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_node_pattern("^add node (\\W+)$");
-regex add_resistor_pattern(R"(^add resistor (\w+) ([0-9]*\.?[0-9]+) (\w+) (\w+)$)");
-regex add_VS_pattern(R"(^add voltage source (\w+) ([0-9]*\.?[0-9]+) (\w+) (\w+)$)");
-regex add_ground_pattern("^add ground (\\w+)$");
-regex read_current_pattern("^read current (\\w+)$");
-regex read_voltage_pattern("^read voltage (\\w+)$");
-regex read_node_V_pattern("^read node voltage (\\w+)$");
+regex add_node_pattern("add node (\\w+)");
+regex add_resistor_pattern(R"(add resistor (\w+) (\w+) (\w+) (\w+))");
+regex add_VS_pattern(R"(add voltage source (\w+) (\w+) (\w+))");
+regex add_ground_pattern("add ground (\\w+)");
+regex read_current_pattern("read current (\\w+)");
+regex read_voltage_pattern("read voltage (\\w+)");
+regex read_node_V_pattern("read node voltage (\\w+)");
 
 // Model----------------------------------------------------------------------------------------------------------------
 
@@ -148,14 +148,9 @@ public:
         {
             if (n->get_name() == node_1)
                 N1 = n;
-            else if (n->get_name() == node_2)
+            if (n->get_name() == node_2)
                 N2 = n;
         }
-        if (!N1 || !N2) {
-            cerr << "Error: One or both nodes not found.\n";
-            return;
-        }
-
         resistors.push_back(new Resistor(name, N1, N2, R));
     }
     void add_VS(string name, float V, string node_1, string node_2)
@@ -166,14 +161,9 @@ public:
         {
             if (n->get_name() == node_1)
                 N1 = n;
-            else if (n->get_name() == node_2)
+            if (n->get_name() == node_2)
                 N2 = n;
         }
-        if (!N1 || !N2) {
-            cerr << "Error: One or both nodes not found.\n";
-            return;
-        }
-
         VS = new Voltage_Source(name, N1, N2, V);
     }
     void read_current(const string& name)
@@ -294,6 +284,8 @@ public:
         for (int i = 0; i < nodes_count; i++)
             non_ground_nodes[i]->set_voltage(node_voltages[i]);
         ground->set_voltage(0);
+        for (Node* node: nodes)
+            cout << node->get_name() << " voltage = " << node->get_voltage() << endl;
     }
 };
 
@@ -312,9 +304,9 @@ int main()
         else if (regex_match(command, match, add_node_pattern))
             controller.add_node(match[1]);
         else if (regex_match(command, match, add_resistor_pattern))
-            controller.add_resistor(match[1], stof(match[2]), match[3], match[4]);
+            controller.add_resistor(match[2], stof(match[1]), match[3], match[4]);
         else if (regex_match(command, match, add_VS_pattern))
-            controller.add_VS(match[1], stof(match[2]), match[3], match[4]);
+            controller.add_VS("VIN", stof(match[1]), match[2], match[3]);
         else if (regex_match(command, match, add_ground_pattern))
             controller.add_ground(match[1]);
         else if (regex_match(command, match, read_current_pattern))
