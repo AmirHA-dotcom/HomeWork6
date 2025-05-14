@@ -7,18 +7,18 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_student_pattern(R"(^Add student (\S+) (\S+) (\d{10}) (\d{10}) (\S+) (\d{9}) (\d{4})$)");
-regex add_professor_pattern(R"(^Add professor (\S+) (\S+) (\d{10}) (\d{10}) (\S+) (\d+)$)");
-regex add_TA_pattern(R"(^Add TA (\S+) (\S+) (\d{10}) (\d{10}) (\S+) (\d{9}) (\d{4}) (\S+)$)");
-regex create_class_pattern("^Create course (\\S+)$");
-regex add_student_to_course_pattern(R"(^Enroll student (\S+) (\S+) (\d{9}) in course (/S+)$)");
-regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{9}) to course (\S+)$)");
-regex assign_course_grade_pattern(R"(^Assign grade (\S+) for course (\S+) for student (\S+) (\S+) (\d{9}) $)");
+regex add_student_pattern(R"(^Add student (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4})$)");
+regex add_professor_pattern(R"(^Add professor (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d+)$)");
+regex add_TA_pattern(R"(^Add TA (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4}) (\S+)$)");
+regex create_class_pattern(R"(^Create course (\S+)(?: (\S+))?(?: (\S+))?$)");
+regex add_student_to_course_pattern(R"(^Enroll student (\S+) (\S+) (\d{9}) in course (\S+)(?: (\S+))?(?: (\S+))?$)");
+regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{9}) to course (\S+)(?: (\S+))?(?: (\S+))?$)");
+regex assign_course_grade_pattern(R"(^Assign grade (\S+) for course (\S+)(?: (\S+))?(?: (\S+))? for student (\S+) (\S+) (\d{9}) $)");
 regex show_student_info_pattern(R"(^Find student (\S+) (\S+) (\d{9})$)");
 regex show_professor_info_pattern(R"(^Find professor (\S+) (\S+) (\d{10})$)");
-regex show_course_info_pattern("^Find course (\\S+)$");
-regex show_course_students_pattern("^List students in course (\\w+)$");
-regex assign_assistant_to_course_pattern(R"(^Assign assistant (\S+) (\S+) (\d{9}) to course (\S+)$)");
+regex show_course_info_pattern(R"(^Find course (\S+)(?: (\S+))?(?: (\S+))?$)");
+regex show_course_students_pattern(R"(^List students in course (\S+)(?: (\S+))?(?: (\S+))?$)");
+regex assign_assistant_to_course_pattern(R"(^Assign assistant (\S+) (\S+) (\d{9}) to course (\S+)(?: (\S+))?(?: (\S+))?$)");
 
 // Model----------------------------------------------------------------------------------------------------------------
 
@@ -234,11 +234,31 @@ int main()
         if(command == "exit")
             return 0;
         else if (regex_match(command, match, add_student_pattern))
+        {
+            string course_name = match[1];
+            course_name += " ";
+            course_name += match[2];
+            course_name += " ";
+            course_name += match[3];
             AHA.add_student(match[1], match[2], match[3], match[4], match[5], match[6], match[7]);
+        }
         else if (regex_match(command, match, add_professor_pattern))
+        {
             AHA.add_professor(match[1], match[2], match[3], match[4], match[5], match[6]);
+        }
         else if (regex_match(command, match, add_TA_pattern))
+        {
             AHA.add_TA(match[1], match[2], match[3], match[4], match[5], match[6], match[7], match[8]);
+        }
+        else if (regex_match(command, match, create_class_pattern))
+        {
+            string course_name = match[1];
+            course_name += " ";
+            course_name += match[2];
+            course_name += " ";
+            course_name += match[3];
+            AHA.add_course(course_name);
+        }
         else
             cout << "OOPs, something went wrong!" << endl;
     }
