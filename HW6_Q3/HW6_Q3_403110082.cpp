@@ -41,14 +41,17 @@ public:
 class Student : public Person
 {
 protected:
-    string major;
+    string specialization;
     string student_ID;
     string entrance_year;
+    float GPA;
 public:
-    Student(string& fname, string& lname, string& n_ID, string& phone_NO, string& major_, string& s_ID, string& e_year) : Person(fname, lname, n_ID, phone_NO), major(major_), student_ID(s_ID), entrance_year(e_year) {}
-    string get_major() {return major;}
+    Student(string& fname, string& lname, string& n_ID, string& phone_NO, string& specialization_, string& s_ID, string& e_year) : Person(fname, lname, n_ID, phone_NO), specialization(specialization_), student_ID(s_ID), entrance_year(e_year) {GPA = 0.0f;}
+    string get_specialization() {return specialization;}
     string get_student_ID() {return student_ID;}
     string get_entrance_year() {return entrance_year;}
+    float get_GPA() {return GPA;}
+    vector<pair<string, float>> courses;
     void display_info() override
     {
 
@@ -73,7 +76,7 @@ class Assistant : public Student
 private:
     string role;
 public:
-    Assistant(string& fname, string& lname, string& n_ID, string& phone_NO, string& major_, string& s_ID, string& e_year, string& role_) : Student(fname, lname, n_ID, phone_NO, major_, s_ID, e_year), role(role_) {}
+    Assistant(string& fname, string& lname, string& n_ID, string& phone_NO, string& specialization_, string& s_ID, string& e_year, string& role_) : Student(fname, lname, n_ID, phone_NO, specialization_, s_ID, e_year), role(role_) {}
     void display_info() override
     {
 
@@ -121,9 +124,23 @@ private:
     vector<Assistant*> assistants;
     vector<Course*> courses;
 public:
-    void add_student(string first_name, string last_name, string national_ID, string phone, string major, string student_ID, string year)
+    void add_student(string first_name, string last_name, string national_ID, string phone, string specialization, string student_ID, string year)
     {
-        students.push_back(new Student(first_name, last_name, national_ID, phone, major, student_ID, year));
+        int student_index = -1;
+        for (int i = 0; i < students.size(); i++)
+        {
+            if (students[i]->get_first_name() == first_name && students[i]->get_last_name() == last_name && students[i]->get_student_ID() == student_ID)
+            {
+                student_index = i;
+                break;
+            }
+        }
+        if (student_index != -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        students.push_back(new Student(first_name, last_name, national_ID, phone, specialization, student_ID, year));
         cout << "Student added successfully!" << endl;
     }
     void add_professor(string first_name, string last_name, string national_ID, string phone, string department, string salary)
@@ -131,9 +148,9 @@ public:
         professors.push_back(new Professor(first_name, last_name, national_ID, phone, department, salary));
         cout << "professor added successfully!" << endl;
     }
-    void add_TA(string first_name, string last_name, string national_ID, string phone, string major, string student_ID, string year, string role)
+    void add_TA(string first_name, string last_name, string national_ID, string phone, string specialization, string student_ID, string year, string role)
     {
-        assistants.push_back(new Assistant(first_name, last_name, national_ID, phone, major, student_ID, year, role));
+        assistants.push_back(new Assistant(first_name, last_name, national_ID, phone, specialization, student_ID, year, role));
         cout << "Assistant added successfully!" << endl;
     }
     void add_course(string course_name)
@@ -180,6 +197,7 @@ public:
             return;
         }
         courses[course_index]->add_student(students[student_index]);
+        students[student_index]->courses.emplace_back(course_name, 0.0f);
         cout << "Student enrolled in the course successfully!" << endl;
     }
     void assign_professor_to_course(string first_name, string last_name, string national_ID, string course_name)
@@ -219,6 +237,64 @@ public:
         courses[course_index]->assign_professor(professors[professor_index]);
         cout << "Professor assigned to the course successfully!" << endl;
     }
+    void show_student_info(string first_name, string last_name, string student_ID)
+    {
+        int student_index = -1;
+        for (int i = 0; i < students.size(); i++)
+        {
+            if (students[i]->get_first_name() == first_name && students[i]->get_last_name() == last_name && students[i]->get_student_ID() == student_ID)
+            {
+                student_index = i;
+                break;
+            }
+        }
+        int assistant_index = -1;
+        for (int i = 0; i < assistants.size(); i++)
+        {
+            if (assistants[i]->get_first_name() == first_name && assistants[i]->get_last_name() == last_name && assistants[i]->get_student_ID() == student_ID)
+            {
+                assistant_index = i;
+                break;
+            }
+        }
+        if (student_index == -1 && assistant_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        if (student_index != -1)
+        {
+            Student* student  = students[student_index];
+            cout << "Name: " << student->get_first_name() << " " << student->get_last_name() << endl;
+            cout << "National ID: " << student->get_national_ID() << endl;
+            cout << "Phone number: " << student->get_phone_number() << endl;
+            cout << "Student ID: " << student->get_student_ID() << endl;
+            cout << "Major: " << student->get_specialization() << endl;
+            cout << "Entrance Year: " << student->get_entrance_year() << endl;
+            cout << "GPA: " << student->get_GPA() << endl;
+            cout << "Courses:" << endl;
+            for (const auto& course: student->courses)
+            {
+                if (course.second == 0.0f)
+                    cout << course.first << ": " << "[Not Graded]" << endl;
+                else
+                    cout << course.first << ": " << course.second << endl;
+            }
+        }
+        else if (assistant_index != -1)
+        {
+            Assistant* assistant  = assistants[assistant_index];
+            cout << "Name: " << assistant->get_first_name() << " " << assistant->get_last_name() << endl;
+            cout << "National ID: " << assistant->get_national_ID() << endl;
+            cout << "Phone number: " << assistant->get_phone_number() << endl;
+            cout << "Student ID: " << assistant->get_student_ID() << endl;
+            cout << "Major: " << assistant->get_specialization() << endl;
+            cout << "Entrance Year: " << assistant->get_entrance_year() << endl;
+            cout << "GPA: " << assistant->get_GPA() << endl;
+            cout << "Courses:" << endl;
+
+        }
+    }
 };
 
 // Int Main-------------------------------------------------------------------------------------------------------------
@@ -235,29 +311,51 @@ int main()
             return 0;
         else if (regex_match(command, match, add_student_pattern))
         {
-            string course_name = match[1];
-            course_name += " ";
-            course_name += match[2];
-            course_name += " ";
-            course_name += match[3];
-            AHA.add_student(match[1], match[2], match[3], match[4], match[5], match[6], match[7]);
+            string specialization = match[5];
+            if (match[6] != "")
+                specialization += " ";
+            specialization += match[6];
+            if (match[7] != "")
+                specialization += " ";
+            specialization += match[7];
+            AHA.add_student(match[1], match[2], match[3], match[4], specialization, match[8], match[9]);
         }
         else if (regex_match(command, match, add_professor_pattern))
         {
-            AHA.add_professor(match[1], match[2], match[3], match[4], match[5], match[6]);
+            string department = match[5];
+            if (match[6] != "")
+                department += " ";
+            department += match[6];
+            if (match[7] != "")
+                department += " ";
+            department += match[7];
+            AHA.add_professor(match[1], match[2], match[3], match[4], match[5], match[8]);
         }
         else if (regex_match(command, match, add_TA_pattern))
         {
-            AHA.add_TA(match[1], match[2], match[3], match[4], match[5], match[6], match[7], match[8]);
+            string specialization = match[5];
+            if (match[6] != "")
+                specialization += " ";
+            specialization += match[6];
+            if (match[7] != "")
+                specialization += " ";
+            specialization += match[7];
+            AHA.add_TA(match[1], match[2], match[3], match[4], match[5], match[8], match[9], match[10]);
         }
         else if (regex_match(command, match, create_class_pattern))
         {
             string course_name = match[1];
-            course_name += " ";
+            if (match[2] != "")
+                course_name += " ";
             course_name += match[2];
-            course_name += " ";
+            if (match[3] != "")
+                course_name += " ";
             course_name += match[3];
             AHA.add_course(course_name);
+        }
+        else if (regex_match(command, match, show_student_info_pattern))
+        {
+
         }
         else
             cout << "OOPs, something went wrong!" << endl;
