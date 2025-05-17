@@ -12,7 +12,7 @@ regex add_professor_pattern(R"(^Add professor (\S+) (\S+) (\d{10}) (\d{10}) (\S+
 regex add_TA_pattern(R"(^Add TA (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4}) (\S+)\s*$)");
 regex create_class_pattern(R"(^Create course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
 regex add_student_to_course_pattern(R"(^Enroll student (\S+) (\S+) (\d{9}) in course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
-regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{9}) to course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
+regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{10}) to course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
 regex assign_course_grade_pattern(R"(^Assign grade (\S+) for course (\S+)(?: (\S+))?(?: (\S+))? for student (\S+) (\S+) (\d{9})\s*$)");
 regex show_student_info_pattern(R"(^Find student (\S+) (\S+) (\d{9})\s*$)");
 regex show_professor_info_pattern(R"(^Find professor (\S+) (\S+) (\d{10})\s*$)");
@@ -178,7 +178,7 @@ public:
         if (instructor == nullptr)
             cout << "Instructor: [None]" << endl;
         else
-            cout << "Instructor: " << instructor->get_first_name() << " " << instructor->get_last_name() << " " << instructor->get_national_ID() << endl;
+            cout << "Instructor: " << instructor->get_first_name() << " " << instructor->get_last_name() << endl;
         cout << "Assistants:" << endl;
         if (assistants.empty())
             cout << "There are no assistants for this course." << endl;
@@ -295,11 +295,113 @@ public:
     }
     void add_student_to_course(string first_name, string last_name, string student_ID, string course_name)
     {
-
+        int course_index = find_course_index(course_name);
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        Course* course = courses[course_index];
+        int student_index = -1;
+        int i = 0;
+        for (const auto& student: course->get_students())
+        {
+            if (student->get_first_name() == first_name &&
+                student->get_last_name() == last_name &&
+                student->get_student_ID() == student_ID)
+            {
+                student_index = i;
+                break;
+            }
+            i++;
+        }
+        if (student_index != -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        Student* new_student = new Student(first_name, last_name, "", "", "", student_ID, "");
+        Person* new_person = new_student;
+        student_index = find_person_index(new_person, student);
+        if (student_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        new_student = dynamic_cast <Student*> (people[student_index].first);
+        courses[course_index]->add_student(new_student);
+        cout << "Student enrolled in the course successfully!" << endl;
+        new_student->courses.push_back({course_name, 0.0});
     }
     void assign_professor_to_course(string first_name, string last_name, string national_ID, string course_name)
     {
+        int course_index = find_course_index(course_name);
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        Course* course = courses[course_index];
+        if (course->get_professor() != nullptr)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        Professor* new_professor = new Professor(first_name, last_name, national_ID, "", "","0");
+        Person* new_person =  new_professor;
+        int person_index = find_person_index(new_person, professor);
+        if (person_index == -1)
+        {
+            delete new_person;
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        new_professor = dynamic_cast <Professor*> (people[person_index].first);
+        courses[course_index]->assign_professor(new_professor);
+        cout << "Professor assigned to the course successfully!" << endl;
+        new_professor->assigned_courses.push_back(course_name);
+    }
+    void assign_assistant_to_course(string first_name, string last_name, string student_ID, string course_name)
+    {
+        int course_index = find_course_index(course_name);
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        Course* course = courses[course_index];
+        int assistant_index = -1;
+        int i = 0;
+        for (const auto& assistant: course->get_assistants())
+        {
+            if (assistant->get_first_name() == first_name &&
+                assistant->get_last_name() == last_name &&
+                assistant->get_student_ID() == student_ID)
+            {
+                assistant_index = i;
+                break;
+            }
+            i++;
+        }
+        if (assistant_index != -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
 
+        Assistant* new_assistant = new Assistant(first_name, last_name, "", "", "", student_ID, "", "");
+        Person* new_person =  new_assistant;
+        int person_index = find_person_index(new_person, assistant);
+        if (person_index == -1)
+        {
+            delete new_person;
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        new_assistant = dynamic_cast<Assistant*> (people[person_index].first);
+        courses[course_index]->add_assistant(new_assistant);
+        cout << "Assistant assigned to the course successfully!" << endl;
+        new_assistant->assigned_courses.push_back(course_name);
     }
     void show_student_info(string first_name, string last_name, string student_ID)
     {
@@ -420,6 +522,33 @@ int main()
             if (match[2].matched) course_name += " " + match[2].str();
             if (match[3].matched) course_name += " " + match[3].str();
             AHA.show_course_info(course_name);
+        }
+        else if (regex_match(command, match, add_student_to_course_pattern))
+        {
+            string first_name = name_modifier(match[1]);
+            string last_name = name_modifier(match[2]);
+            string course_name = match[4];
+            if (match[5].matched) course_name += " " + match[5].str();
+            if (match[6].matched) course_name += " " + match[6].str();
+            AHA.add_student_to_course(first_name, last_name, match[3], course_name);
+        }
+        else if (regex_match(command, match, assign_professor_pattern))
+        {
+            string first_name = name_modifier(match[1]);
+            string last_name = name_modifier(match[2]);
+            string course_name = match[4];
+            if (match[5].matched) course_name += " " + match[5].str();
+            if (match[6].matched) course_name += " " + match[6].str();
+            AHA.assign_professor_to_course(first_name, last_name, match[3], course_name);
+        }
+        else if (regex_match(command, match, assign_assistant_to_course_pattern))
+        {
+            string first_name = name_modifier(match[1]);
+            string last_name = name_modifier(match[2]);
+            string course_name = match[4];
+            if (match[5].matched) course_name += " " + match[5].str();
+            if (match[6].matched) course_name += " " + match[6].str();
+            AHA.assign_assistant_to_course(first_name, last_name, match[3], course_name);
         }
         else
             cout << "OOPs, something went wrong!" << endl;
