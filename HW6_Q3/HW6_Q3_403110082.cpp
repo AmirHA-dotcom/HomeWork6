@@ -22,6 +22,8 @@ regex assign_assistant_to_course_pattern(R"(^Assign assistant (\S+) (\S+) (\d{9}
 
 // Model----------------------------------------------------------------------------------------------------------------
 
+enum Type {student, professor, assistant};
+
 class Person
 {
 protected:
@@ -118,181 +120,88 @@ public:
 
 class Controller
 {
-    vector<Student*> students;
-    vector<Professor*> professors;
-    vector<Assistant*> assistants;
-    vector<Course*> courses;
+private:
+    vector<pair<Person*, Type>> people;
+    int find_person_index(Person* person, Type type)
+    {
+        if (type == professor)
+        {
+            for (int i = 0; i < people.size(); i++)
+            {
+                if (people[i].second == professor)
+                {
+                    if (people[i].first->get_first_name() == person->get_first_name() &&
+                            people[i].first->get_last_name() == person->get_last_name() &&
+                            people[i].first->get_national_ID() == person->get_national_ID())
+                        return i;
+                }
+            }
+        }
+        else
+        {
+            Student* student1 = dynamic_cast <Student*> (person);
+            for (int i = 0; i < people.size(); i++)
+            {
+                if (people[i].second == student || people[i].second == assistant)
+                {
+                    Student* student2 = dynamic_cast <Student*> (people[i].first);
+                    if (student2->get_first_name() == student1->get_first_name() &&
+                            student2->get_last_name() == student1->get_last_name() &&
+                            student2->get_student_ID() == student1->get_student_ID())
+                        return i;
+                }
+            }
+        }
+        return -1;
+    }
 public:
     void add_student(string first_name, string last_name, string national_ID, string phone, string specialization, string student_ID, string year)
     {
-        int student_index = -1;
-        for (int i = 0; i < students.size(); i++)
+        Student* new_student = new Student(first_name, last_name, national_ID, phone, specialization, student_ID, year);
+        Person* new_person =  new_student;
+        int person_index = find_person_index(new_person, student);
+        if (person_index != -1)
         {
-            if (students[i]->get_first_name() == first_name && students[i]->get_last_name() == last_name && students[i]->get_student_ID() == student_ID)
-            {
-                student_index = i;
-                break;
-            }
-        }
-        if (student_index != -1)
-        {
+            delete new_person;
             cout << "OOPs, something went wrong!" << endl;
             return;
         }
-        students.push_back(new Student(first_name, last_name, national_ID, phone, specialization, student_ID, year));
+        people.emplace_back(new_person, student);
         cout << "Student added successfully!" << endl;
     }
     void add_professor(string first_name, string last_name, string national_ID, string phone, string department, string salary)
     {
-        professors.push_back(new Professor(first_name, last_name, national_ID, phone, department, salary));
-        cout << "professor added successfully!" << endl;
+        Professor*  new_professor = new Professor(first_name, last_name, national_ID, phone, department, salary);
+        Person* new_person =  new_professor;
+        int person_index = find_person_index(new_person, professor);
+        if (person_index != -1)
+        {
+            delete new_person;
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        people.emplace_back(new_person, professor);
+        cout << "Professor added successfully!" << endl;
     }
     void add_TA(string first_name, string last_name, string national_ID, string phone, string specialization, string student_ID, string year, string role)
     {
-        assistants.push_back(new Assistant(first_name, last_name, national_ID, phone, specialization, student_ID, year, role));
-        cout << "Assistant added successfully!" << endl;
+
     }
     void add_course(string course_name)
     {
-        courses.push_back(new Course(course_name));
-        cout << "Course created successfully!" << endl;
+
     }
     void add_student_to_course(string first_name, string last_name, string student_ID, string course_name)
     {
-        int course_index = -1;
-        for (int i = 0; i < courses.size(); i++)
-        {
-            if (courses[i]->get_name() == course_name)
-            {
-                course_index = i;
-                break;
-            }
-        }
-        if (course_index == -1)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
-        for (Student* student: courses[course_index]->get_students())
-        {
-            if (student->get_first_name() == first_name && student->get_last_name() == last_name && student->get_student_ID() == student_ID)
-            {
-                cout << "OOPs, something went wrong!" << endl;
-                return;
-            }
-        }
-        int student_index = -1;
-        for (int i = 0; i < students.size(); i++)
-        {
-            if (students[i]->get_first_name() == first_name && students[i]->get_last_name() == last_name && students[i]->get_student_ID() == student_ID)
-            {
-                student_index = i;
-                break;
-            }
-        }
-        if (student_index == -1)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
-        courses[course_index]->add_student(students[student_index]);
-        students[student_index]->courses.emplace_back(course_name, 0.0f);
-        cout << "Student enrolled in the course successfully!" << endl;
+
     }
     void assign_professor_to_course(string first_name, string last_name, string national_ID, string course_name)
     {
-        int course_index = -1;
-        for (int i = 0; i < courses.size(); i++)
-        {
-            if (courses[i]->get_name() == course_name)
-            {
-                course_index = i;
-                break;
-            }
-        }
-        if (course_index == -1)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
-        if (courses[course_index]->get_professor() == nullptr)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
-        int professor_index = -1;
-        for (int i = 0; i < professors.size(); i++)
-        {
-            if (professors[i]->get_first_name() == first_name && professors[i]->get_last_name() == last_name && professors[i]->get_national_ID() == national_ID)
-            {
-                professor_index = i;
-            }
-        }
-        if (professor_index == -1)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
-        courses[course_index]->assign_professor(professors[professor_index]);
-        cout << "Professor assigned to the course successfully!" << endl;
+
     }
     void show_student_info(string first_name, string last_name, string student_ID)
     {
-        int student_index = -1;
-        for (int i = 0; i < students.size(); i++)
-        {
-            if (students[i]->get_first_name() == first_name && students[i]->get_last_name() == last_name && students[i]->get_student_ID() == student_ID)
-            {
-                student_index = i;
-                break;
-            }
-        }
-        int assistant_index = -1;
-        for (int i = 0; i < assistants.size(); i++)
-        {
-            if (assistants[i]->get_first_name() == first_name && assistants[i]->get_last_name() == last_name && assistants[i]->get_student_ID() == student_ID)
-            {
-                assistant_index = i;
-                break;
-            }
-        }
-        if (student_index == -1 && assistant_index == -1)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
-        if (student_index != -1)
-        {
-            Student* student  = students[student_index];
-            cout << "Name: " << student->get_first_name() << " " << student->get_last_name() << endl;
-            cout << "National ID: " << student->get_national_ID() << endl;
-            cout << "Phone number: " << student->get_phone_number() << endl;
-            cout << "Student ID: " << student->get_student_ID() << endl;
-            cout << "Major: " << student->get_specialization() << endl;
-            cout << "Entrance Year: " << student->get_entrance_year() << endl;
-            cout << "GPA: " << student->get_GPA() << endl;
-            cout << "Courses:" << endl;
-            for (const auto& course: student->courses)
-            {
-                if (course.second == 0.0f)
-                    cout << course.first << ": " << "[Not Graded]" << endl;
-                else
-                    cout << course.first << ": " << course.second << endl;
-            }
-        }
-        else if (assistant_index != -1)
-        {
-            Assistant* assistant  = assistants[assistant_index];
-            cout << "Name: " << assistant->get_first_name() << " " << assistant->get_last_name() << endl;
-            cout << "National ID: " << assistant->get_national_ID() << endl;
-            cout << "Phone number: " << assistant->get_phone_number() << endl;
-            cout << "Student ID: " << assistant->get_student_ID() << endl;
-            cout << "Major: " << assistant->get_specialization() << endl;
-            cout << "Entrance Year: " << assistant->get_entrance_year() << endl;
-            cout << "GPA: " << assistant->get_GPA() << endl;
-            cout << "Courses:" << endl;
 
-        }
     }
 };
 
