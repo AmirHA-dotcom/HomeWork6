@@ -176,7 +176,7 @@ public:
     {
         cout << "Course: " << course_name << endl;
         if (instructor == nullptr)
-            cout << "[None]" << endl;
+            cout << "Instructor: [None]" << endl;
         else
             cout << "Instructor: " << instructor->get_first_name() << " " << instructor->get_last_name() << " " << instructor->get_national_ID() << endl;
         cout << "Assistants:" << endl;
@@ -287,7 +287,7 @@ public:
         int course_index = find_course_index(course_name);
         if (course_index != -1)
         {
-            cout << "" << endl;
+            cout << "OOPs, something went wrong!" << endl;
             return;
         }
         courses.push_back(new Course(course_name));
