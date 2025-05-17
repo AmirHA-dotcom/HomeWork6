@@ -118,7 +118,6 @@ public:
 
 class Controller
 {
-private:
     vector<Student*> students;
     vector<Professor*> professors;
     vector<Assistant*> assistants;
