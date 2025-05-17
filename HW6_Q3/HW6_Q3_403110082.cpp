@@ -77,6 +77,14 @@ public:
             }
         }
     }
+    void add_score(float score, int course_index)
+    {
+        courses[course_index].second = score;
+        float sum = 0;
+        for (auto course: courses)
+            sum += course.second;
+        GPA = sum/courses.size();
+    }
 };
 
 class Professor : public Person
@@ -439,6 +447,41 @@ public:
         }
         courses[course_index]->display_course_info();
     }
+    void assign_grade(float grade, string course_name, string first_name, string last_name, string student_ID)
+    {
+        int course_index = find_course_index(course_name);
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        Student* new_student = new Student(first_name, last_name, "", "", "", student_ID, "");
+        Person* new_person =  new_student;
+        int person_index = find_person_index(new_person, student);
+        if (person_index == -1)
+        {
+            delete new_person;
+            cout << "OOPs, something went wrong!" << endl;  // this has bug!!!
+            return;
+        }
+        Student* student = dynamic_cast<Student*> (people[person_index].first);
+        int class_index = -1;
+        for (int i = 0; i < student->courses.size(); i++)
+        {
+            if (course_name == student->courses[i].first)
+            {
+                class_index = i;
+                break;
+            }
+        }
+        if (class_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        student->add_score(grade, class_index);
+        cout << "Course graded successfully!" << endl;
+    }
     ~Controller()
     {
         for (auto& p : people) delete p.first;
@@ -549,6 +592,16 @@ int main()
             if (match[5].matched) course_name += " " + match[5].str();
             if (match[6].matched) course_name += " " + match[6].str();
             AHA.assign_assistant_to_course(first_name, last_name, match[3], course_name);
+        }
+        else if (regex_match(command, match, assign_course_grade_pattern))
+        {
+            float grade = stof(match[1]);
+            string first_name = name_modifier(match[6]);
+            string last_name = name_modifier(match[5]);
+            string course_name = match[2];
+            if (match[3].matched) course_name += " " + match[3].str();
+            if (match[4].matched) course_name += " " + match[4].str();
+            AHA.assign_grade(grade, course_name, first_name, last_name, match[7]);
         }
         else
             cout << "OOPs, something went wrong!" << endl;
