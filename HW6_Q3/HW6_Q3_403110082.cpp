@@ -322,13 +322,13 @@ public:
         }
         Student* new_student = new Student(first_name, last_name, "", "", "", student_ID, "");
         Person* new_person = new_student;
-        student_index = find_person_index(new_person, student);
-        if (student_index == -1)
+        int person_index = find_person_index(new_person, student);
+        if (person_index == -1)
         {
             cout << "OOPs, something went wrong!" << endl;
             return;
         }
-        new_student = dynamic_cast <Student*> (people[student_index].first);
+        new_student = dynamic_cast <Student*> (people[person_index].first);
         courses[course_index]->add_student(new_student);
         cout << "Student enrolled in the course successfully!" << endl;
         new_student->courses.push_back({course_name, 0.0});
