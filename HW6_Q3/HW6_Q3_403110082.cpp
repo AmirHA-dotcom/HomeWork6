@@ -316,7 +316,7 @@ public:
     }
     void show_professor_info(string first_name, string last_name, string national_ID)
     {
-        Professor* new_professor = new Professor(first_name, last_name, national_ID, "", "","");
+        Professor* new_professor = new Professor(first_name, last_name, national_ID, "", "","0");
         Person* new_person =  new_professor;
         int person_index = find_person_index(new_person, professor);
         if (person_index == -1)
