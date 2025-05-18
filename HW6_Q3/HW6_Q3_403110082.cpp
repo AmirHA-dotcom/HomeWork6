@@ -81,9 +81,16 @@ public:
     {
         courses[course_index].second = score;
         float sum = 0;
+        int graded_course = 0;
         for (auto course: courses)
-            sum += course.second;
-        GPA = sum/courses.size();
+        {
+            if (course.second != 0)
+            {
+                graded_course++;
+                sum += course.second;
+            }
+        }
+        GPA = sum/graded_course;
     }
 };
 
@@ -350,11 +357,6 @@ public:
             return;
         }
         Course* course = courses[course_index];
-        if (course->get_professor() != nullptr)
-        {
-            cout << "OOPs, something went wrong!" << endl;
-            return;
-        }
         Professor* new_professor = new Professor(first_name, last_name, national_ID, "", "","0");
         Person* new_person =  new_professor;
         int person_index = find_person_index(new_person, professor);
@@ -365,6 +367,15 @@ public:
             return;
         }
         new_professor = dynamic_cast <Professor*> (people[person_index].first);
+        if (course->get_professor() == new_professor)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        if (course->get_professor() != nullptr)
+        {
+            course->get_professor()->assigned_courses.pop_back();
+        }
         courses[course_index]->assign_professor(new_professor);
         cout << "Professor assigned to the course successfully!" << endl;
         new_professor->assigned_courses.push_back(course_name);
@@ -461,7 +472,7 @@ public:
         if (person_index == -1)
         {
             delete new_person;
-            cout << "OOPs, something went wrong!" << endl;  // this has bug!!!
+            cout << "OOPs, something went wrong!" << endl;
             return;
         }
         Student* student = dynamic_cast<Student*> (people[person_index].first);
@@ -596,11 +607,11 @@ int main()
         else if (regex_match(command, match, assign_course_grade_pattern))
         {
             float grade = stof(match[1]);
-            string first_name = name_modifier(match[6]);
-            string last_name = name_modifier(match[5]);
             string course_name = match[2];
             if (match[3].matched) course_name += " " + match[3].str();
             if (match[4].matched) course_name += " " + match[4].str();
+            string first_name = name_modifier(match[5]);
+            string last_name = name_modifier(match[6]);
             AHA.assign_grade(grade, course_name, first_name, last_name, match[7]);
         }
         else
