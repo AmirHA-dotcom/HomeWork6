@@ -460,6 +460,11 @@ public:
     }
     void assign_grade(float grade, string course_name, string first_name, string last_name, string student_ID)
     {
+        if (grade < 0 || grade > 20)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
         int course_index = find_course_index(course_name);
         if (course_index == -1)
         {
