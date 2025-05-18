@@ -136,7 +136,7 @@ public:
         cout << "Student ID: " << student_ID << endl;
         cout << "Major: " << specialization << endl;
         cout << "Entrance Year: " << entrance_year << endl;
-        cout << "GPA: " << GPA << endl;
+        cout << "GPA: " << ((int)(GPA * 100))/100 << endl;
         cout << "Courses:" << endl;
         if (courses.empty())
             cout << "This student is not enrolled in any course." << endl;
@@ -145,7 +145,7 @@ public:
             for (const auto &course: courses)
             {
                 if (course.second != 0)
-                    cout << course.first << ": " << course.second << endl;
+                    cout << course.first << ": " << ((int)(course.second * 100))/100 << endl;
                 else
                     cout << course.first << ": [Not Graded]" << endl;
             }
@@ -385,7 +385,15 @@ public:
         }
         if (course->get_professor() != nullptr)
         {
-            course->get_professor()->assigned_courses.pop_back();
+            vector<string>& c = course->get_professor()->assigned_courses;
+            for (int i = 0; i < c.size(); i++)
+            {
+                if (c[i] == course_name)
+                {
+                    c.erase(c.begin() + i);
+                    break;
+                }
+            }
         }
         courses[course_index]->assign_professor(new_professor);
         cout << "Professor assigned to the course successfully!" << endl;
