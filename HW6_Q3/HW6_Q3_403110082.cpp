@@ -8,18 +8,18 @@ using namespace std;
 
 // Regex----------------------------------------------------------------------------------------------------------------
 
-regex add_student_pattern(R"(^Add student (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4})\s*$)");
-regex add_professor_pattern(R"(^Add professor (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d+)\s*$)");
-regex add_TA_pattern(R"(^Add TA (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4}) (\S+)\s*$)");
-regex create_class_pattern(R"(^Create course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
-regex add_student_to_course_pattern(R"(^Enroll student (\S+) (\S+) (\d{9}) in course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
-regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{10}) to course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
-regex assign_course_grade_pattern(R"(^Assign grade (\S+) for course (\S+)(?: (\S+))?(?: (\S+))? for student (\S+) (\S+) (\d{9})\s*$)");
+regex add_student_pattern(R"(^Add student (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4})\s*$)");
+regex add_professor_pattern(R"(^Add professor (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))? (\d+)\s*$)");
+regex add_TA_pattern(R"(^Add TA (\S+) (\S+) (\d{10}) (\d{10}) (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))? (\d{9}) (\d{4}) (\S+)\s*$)");
+regex create_class_pattern(R"(^Create course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))?\s*$)");
+regex add_student_to_course_pattern(R"(^Enroll student (\S+) (\S+) (\d{9}) in course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))?\s*$)");
+regex assign_professor_pattern(R"(^Assign professor (\S+) (\S+) (\d{10}) to course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))?\s*$)");
+regex assign_course_grade_pattern(R"(^Assign grade (\S+) for course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))? for student (\S+) (\S+) (\d{9})\s*$)");
 regex show_student_info_pattern(R"(^Find student (\S+) (\S+) (\d{9})\s*$)");
 regex show_professor_info_pattern(R"(^Find professor (\S+) (\S+) (\d{10})\s*$)");
-regex show_course_info_pattern(R"(^Find course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
-regex show_course_students_pattern(R"(^List students in course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
-regex assign_assistant_to_course_pattern(R"(^Assign assistant (\S+) (\S+) (\d{9}) to course (\S+)(?: (\S+))?(?: (\S+))?\s*$)");
+regex show_course_info_pattern(R"(^Find course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))?\s*$)");
+regex show_course_students_pattern(R"(^List students in course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))?\s*$)");
+regex assign_assistant_to_course_pattern(R"(^Assign assistant (\S+) (\S+) (\d{9}) to course (\S+)(?: (\S+))?(?: (\S+))?(?: (\S+))?(?: (\S+))?\s*$)");
 
 // Model----------------------------------------------------------------------------------------------------------------
 
@@ -564,33 +564,41 @@ int main()
             string specialization = match[5];
             if (match[6].matched) specialization += " " + match[6].str();
             if (match[7].matched) specialization += " " + match[7].str();
+            if (match[8].matched) specialization += " " + match[8].str();
+            if (match[9].matched) specialization += " " + match[9].str();
             string first_name = name_modifier(match[1]);
             string last_name = name_modifier(match[2]);
-            AHA.add_student(first_name, last_name, match[3], match[4], specialization, match[8], match[9]);
+            AHA.add_student(first_name, last_name, match[3], match[4], specialization, match[10], match[11]);
         }
         else if (regex_match(command, match, add_professor_pattern))
         {
             string department = match[5];
             if (match[6].matched) department += " " + match[6].str();
             if (match[7].matched) department += " " + match[7].str();
+            if (match[8].matched) department += " " + match[8].str();
+            if (match[9].matched) department += " " + match[9].str();
             string first_name = name_modifier(match[1]);
             string last_name = name_modifier(match[2]);
-            AHA.add_professor(first_name, last_name, match[3], match[4], department, match[8]);
+            AHA.add_professor(first_name, last_name, match[3], match[4], department, match[10]);
         }
         else if (regex_match(command, match, add_TA_pattern))
         {
             string specialization = match[5];
             if (match[6].matched) specialization += " " + match[6].str();
             if (match[7].matched) specialization += " " + match[7].str();
+            if (match[8].matched) specialization += " " + match[8].str();
+            if (match[9].matched) specialization += " " + match[9].str();
             string first_name = name_modifier(match[1]);
             string last_name = name_modifier(match[2]);
-            AHA.add_TA(first_name, last_name, match[3], match[4], specialization, match[8], match[9], match[10]);
+            AHA.add_TA(first_name, last_name, match[3], match[4], specialization, match[10], match[11], match[12]);
         }
         else if (regex_match(command, match, create_class_pattern))
         {
             string course_name = match[1];
             if (match[2].matched) course_name += " " + match[2].str();
             if (match[3].matched) course_name += " " + match[3].str();
+            if (match[5].matched) course_name += " " + match[4].str();
+            if (match[4].matched) course_name += " " + match[5].str();
             AHA.add_course(course_name);
         }
         else if (regex_match(command, match, show_student_info_pattern))
@@ -610,6 +618,8 @@ int main()
             string course_name = match[1];
             if (match[2].matched) course_name += " " + match[2].str();
             if (match[3].matched) course_name += " " + match[3].str();
+            if (match[4].matched) course_name += " " + match[4].str();
+            if (match[5].matched) course_name += " " + match[5].str();
             AHA.show_course_info(course_name);
         }
         else if (regex_match(command, match, add_student_to_course_pattern))
@@ -619,6 +629,8 @@ int main()
             string course_name = match[4];
             if (match[5].matched) course_name += " " + match[5].str();
             if (match[6].matched) course_name += " " + match[6].str();
+            if (match[7].matched) course_name += " " + match[7].str();
+            if (match[8].matched) course_name += " " + match[8].str();
             AHA.add_student_to_course(first_name, last_name, match[3], course_name);
         }
         else if (regex_match(command, match, assign_professor_pattern))
@@ -628,6 +640,8 @@ int main()
             string course_name = match[4];
             if (match[5].matched) course_name += " " + match[5].str();
             if (match[6].matched) course_name += " " + match[6].str();
+            if (match[7].matched) course_name += " " + match[7].str();
+            if (match[8].matched) course_name += " " + match[8].str();
             AHA.assign_professor_to_course(first_name, last_name, match[3], course_name);
         }
         else if (regex_match(command, match, assign_assistant_to_course_pattern))
@@ -637,6 +651,8 @@ int main()
             string course_name = match[4];
             if (match[5].matched) course_name += " " + match[5].str();
             if (match[6].matched) course_name += " " + match[6].str();
+            if (match[7].matched) course_name += " " + match[7].str();
+            if (match[8].matched) course_name += " " + match[8].str();
             AHA.assign_assistant_to_course(first_name, last_name, match[3], course_name);
         }
         else if (regex_match(command, match, assign_course_grade_pattern))
@@ -645,15 +661,19 @@ int main()
             string course_name = match[2];
             if (match[3].matched) course_name += " " + match[3].str();
             if (match[4].matched) course_name += " " + match[4].str();
-            string first_name = name_modifier(match[5]);
-            string last_name = name_modifier(match[6]);
-            AHA.assign_grade(grade, course_name, first_name, last_name, match[7]);
+            if (match[5].matched) course_name += " " + match[5].str();
+            if (match[6].matched) course_name += " " + match[6].str();
+            string first_name = name_modifier(match[7]);
+            string last_name = name_modifier(match[8]);
+            AHA.assign_grade(grade, course_name, first_name, last_name, match[9]);
         }
         else if (regex_match(command, match, show_course_students_pattern))
         {
             string course_name = match[1];
             if (match[2].matched) course_name += " " + match[2].str();
             if (match[3].matched) course_name += " " + match[3].str();
+            if (match[4].matched) course_name += " " + match[4].str();
+            if (match[5].matched) course_name += " " + match[5].str();
             AHA.show_course_students(course_name);
         }
         else
