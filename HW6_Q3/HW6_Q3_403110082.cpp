@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <regex>
+#include <cmath>
 
 using namespace std;
 
@@ -62,7 +63,7 @@ public:
         cout << "Student ID: " << student_ID << endl;
         cout << "Major: " << specialization << endl;
         cout << "Entrance Year: " << entrance_year << endl;
-        cout << "GPA: " << ((int)(GPA * 100))/100 << endl;
+        cout << "GPA: " << (floor(GPA * 100))/100.0 << endl;
         cout << "Courses:" << endl;
         if (courses.empty())
             cout << "This student is not enrolled in any course." << endl;
@@ -71,7 +72,7 @@ public:
             for (const auto &course: courses)
             {
                 if (course.second != 0)
-                    cout << course.first << ": " << ((int)(course.second * 100))/100 << endl;
+                    cout << course.first << ": " << (floor(course.second * 100))/100.0 << endl;
                 else
                     cout << course.first << ": [Not Graded]" << endl;
             }
@@ -136,7 +137,7 @@ public:
         cout << "Student ID: " << student_ID << endl;
         cout << "Major: " << specialization << endl;
         cout << "Entrance Year: " << entrance_year << endl;
-        cout << "GPA: " << ((int)(GPA * 100))/100 << endl;
+        cout << "GPA: " << (floor(GPA * 100))/100.0 << endl;
         cout << "Courses:" << endl;
         if (courses.empty())
             cout << "This student is not enrolled in any course." << endl;
@@ -145,7 +146,7 @@ public:
             for (const auto &course: courses)
             {
                 if (course.second != 0)
-                    cout << course.first << ": " << ((int)(course.second * 100))/100 << endl;
+                    cout << course.first << ": " << (floor(course.second * 100))/100.0 << endl;
                 else
                     cout << course.first << ": [Not Graded]" << endl;
             }
