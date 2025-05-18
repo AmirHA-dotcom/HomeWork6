@@ -62,7 +62,7 @@ public:
         cout << "Student ID: " << student_ID << endl;
         cout << "Major: " << specialization << endl;
         cout << "Entrance Year: " << entrance_year << endl;
-        cout << "GPA: " << GPA << endl;
+        cout << "GPA: " << ((int)(GPA * 100))/100 << endl;
         cout << "Courses:" << endl;
         if (courses.empty())
             cout << "This student is not enrolled in any course." << endl;
@@ -71,7 +71,7 @@ public:
             for (const auto &course: courses)
             {
                 if (course.second != 0)
-                    cout << course.first << ": " << course.second << endl;
+                    cout << course.first << ": " << ((int)(course.second * 100))/100 << endl;
                 else
                     cout << course.first << ": [Not Graded]" << endl;
             }
@@ -203,6 +203,17 @@ public:
                 cout << assistant->get_first_name() << " " << assistant->get_last_name() << " " << assistant->get_student_ID() << endl;
         }
         cout << "Number of participants: " << students.size() << endl;
+    }
+    void display_course_students()
+    {
+        cout << "Students in " << course_name << ":" << endl;
+        if (students.empty())
+            cout << "There are no enrolled students in this course." << endl;
+        else
+        {
+            for (Student* student: students)
+                cout << student->get_first_name() << " " << student->get_last_name() << " " << student->get_student_ID() << endl;
+        }
     }
 };
 
@@ -498,6 +509,16 @@ public:
         student->add_score(grade, class_index);
         cout << "Course graded successfully!" << endl;
     }
+    void show_course_students(string course_name)
+    {
+        int course_index = find_course_index(course_name);
+        if (course_index == -1)
+        {
+            cout << "OOPs, something went wrong!" << endl;
+            return;
+        }
+        courses[course_index]->display_course_students();
+    }
     ~Controller()
     {
         for (auto& p : people) delete p.first;
@@ -618,6 +639,13 @@ int main()
             string first_name = name_modifier(match[5]);
             string last_name = name_modifier(match[6]);
             AHA.assign_grade(grade, course_name, first_name, last_name, match[7]);
+        }
+        else if (regex_match(command, match, show_course_students_pattern))
+        {
+            string course_name = match[1];
+            if (match[2].matched) course_name += " " + match[2].str();
+            if (match[3].matched) course_name += " " + match[3].str();
+            AHA.show_course_students(course_name);
         }
         else
             cout << "OOPs, something went wrong!" << endl;
