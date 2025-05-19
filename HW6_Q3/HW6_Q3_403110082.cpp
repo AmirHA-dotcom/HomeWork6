@@ -597,8 +597,8 @@ int main()
             string course_name = match[1];
             if (match[2].matched) course_name += " " + match[2].str();
             if (match[3].matched) course_name += " " + match[3].str();
-            if (match[5].matched) course_name += " " + match[4].str();
-            if (match[4].matched) course_name += " " + match[5].str();
+            if (match[4].matched) course_name += " " + match[4].str();
+            if (match[5].matched) course_name += " " + match[5].str();
             AHA.add_course(course_name);
         }
         else if (regex_match(command, match, show_student_info_pattern))
